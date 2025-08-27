@@ -32,8 +32,8 @@ on:
 
 env:
   AWS_REGION: MY_AWS_REGION
-  DOCKER_USERNAME: beogonzalez                # set this to your preferred AWS region, e.g. us-west-1
-  DOCKER_REPOSITORY: MY_ECR_REPOSITORY           # set this to your Amazon ECR repository name
+  DOCKER_USERNAME: beogonzalez                # usuario docker
+  DOCKER_REPO: clase-devops                   # repo docker
   ECS_SERVICE: MY_ECS_SERVICE                 # set this to your Amazon ECS service name
   ECS_CLUSTER: MY_ECS_CLUSTER                 # set this to your Amazon ECS cluster name
   ECS_TASK_DEFINITION: MY_ECS_TASK_DEFINITION # set this to the path to your Amazon ECS task definition
@@ -66,7 +66,14 @@ jobs:
     - name: deploy en AWS
       run: |
         mkdir -p  ~/.ssh
-        echo "${{secrets.ECS_SSH_KEY}}" > ~/.ssh/id_rsa
+        echo "${{secrets.EC2_SSH_KEY}}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
+
+        ssh $EC2_USER@EC2_HOST "\
+          docker pull $DOCKERHUB_USERNAME/$DOCKERHUB_REPO:$IMAGE_TAG && \
+          docker stop mi-app || true && \
+          docker rm mi-app || true && \
+          docker run -d --name mi-app -p 80:80 $DOCKERHUB_USERNAME/$DOCKERHUB_REPO:$IMAGE_TAG \
+        "
 
