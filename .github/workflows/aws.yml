@@ -31,8 +31,9 @@ on:
     branches: [ "main" ]
 
 env:
-  AWS_REGION: MY_AWS_REGION                   # set this to your preferred AWS region, e.g. us-west-1
-  ECR_REPOSITORY: MY_ECR_REPOSITORY           # set this to your Amazon ECR repository name
+  AWS_REGION: MY_AWS_REGION
+  DOCKER_USERNAME: beogonzalez                # set this to your preferred AWS region, e.g. us-west-1
+  DOCKER_REPOSITORY: MY_ECR_REPOSITORY           # set this to your Amazon ECR repository name
   ECS_SERVICE: MY_ECS_SERVICE                 # set this to your Amazon ECS service name
   ECS_CLUSTER: MY_ECS_CLUSTER                 # set this to your Amazon ECS cluster name
   ECS_TASK_DEFINITION: MY_ECS_TASK_DEFINITION # set this to the path to your Amazon ECS task definition
@@ -59,6 +60,13 @@ jobs:
         passwords: ${{secrets.DOCKERHUB_TOKEN}}
 
     - name: build and push
-     run: |
+      run: |
        docker buil -t $DOCKER_USERNAME/$DOCKERHUB_REPO:$IMAGE_TAG .
        docker push $DOCKER_USERNAME/$DOCKERHUB_REPO:$IMAGE_TAG
+    - name: deploy en AWS
+      run: |
+        mkdir -p  ~/.ssh
+        echo "${{secrets.ECS_SSH_KEY}}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
+
