@@ -1,0 +1,14 @@
+name: Hola mundo
+
+on:
+  push:
+    branches: [ "pruebas/devops" ]
+
+jobs:
+ practica:
+  runs-on: ubuntu-latest
+  steps:
+    - name : traer-codigo
+      uses: actions/checkout@v4
+    - name : echo actual
+      run : echo "hola mundo" 
